@@ -1,0 +1,5 @@
+$this->modify('[TableName]', function (Structure $table) {
+    [Schema]
+
+    return $table;
+});

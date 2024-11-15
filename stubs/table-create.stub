@@ -1,0 +1,5 @@
+$this->create('[TableName]', function (Structure $table) {
+    [Schema]
+
+    return $table;
+});
