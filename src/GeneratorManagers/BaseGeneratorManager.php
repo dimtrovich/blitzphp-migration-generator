@@ -1,27 +1,35 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\GeneratorManagers;
 
 use BlitzPHP\Debug\Timer;
 use BlitzPHP\Utilities\Helpers;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\GeneratorManagerInterface;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\ViewDefinition;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\DependencyResolver;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\TableDefinition;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\ViewDefinition;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\DependencyResolver;
 
 abstract class BaseGeneratorManager implements GeneratorManagerInterface
 {
     /**
-     * @var TableDefinition[]
+     * @var list<TableDefinition>
      */
     protected array $tables = [];
 
     /**
-     * @var ViewDefinition[]
+     * @var list<ViewDefinition>
      */
     protected array $views = [];
-
 
     public function __construct(private Timer $timer)
     {
@@ -37,7 +45,7 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
     }
 
     /**
-     * @return TableDefinition[]
+     * @return list<TableDefinition>
      */
     public function getTables(): array
     {
@@ -45,7 +53,7 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
     }
 
     /**
-     * @return ViewDefinition[]
+     * @return list<ViewDefinition>
      */
     public function getViews(): array
     {
@@ -74,29 +82,21 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
         $this->init();
 
         $tableDefinitions = Helpers::collect($this->getTables());
-        $viewDefinitions = Helpers::collect($this->getViews());
+        $viewDefinitions  = Helpers::collect($this->getViews());
 
         $this->createMissingDirectory($basePath);
 
         if (count($tableNames) > 0) {
-            $tableDefinitions = $tableDefinitions->filter(function ($tableDefinition) use ($tableNames) {
-                return in_array($tableDefinition->getName(), $tableNames);
-            });
+            $tableDefinitions = $tableDefinitions->filter(fn ($tableDefinition) => in_array($tableDefinition->getName(), $tableNames, true));
         }
-        
+
         if (count($viewNames) > 0) {
-            $viewDefinitions = $viewDefinitions->filter(function ($viewGenerator) use ($viewNames) {
-                return in_array($viewGenerator->getName(), $viewNames);
-            });
+            $viewDefinitions = $viewDefinitions->filter(fn ($viewGenerator) => in_array($viewGenerator->getName(), $viewNames, true));
         }
 
-        $tableDefinitions = $tableDefinitions->filter(function ($tableDefinition) {
-            return ! $this->skipTable($tableDefinition->getName());
-        });
+        $tableDefinitions = $tableDefinitions->filter(fn ($tableDefinition) => ! $this->skipTable($tableDefinition->getName()));
 
-        $viewDefinitions = $viewDefinitions->filter(function ($viewDefinition) {
-            return ! $this->skipView($viewDefinition->getName());
-        });
+        $viewDefinitions = $viewDefinitions->filter(fn ($viewDefinition) => ! $this->skipView($viewDefinition->getName()));
 
         $sorted = $this->sortTables($tableDefinitions->toArray());
 
@@ -108,9 +108,9 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
     }
 
     /**
-     * @param TableDefinition[] $tables
-     * 
-     * @return TableDefinition[]
+     * @param list<TableDefinition> $tables
+     *
+     * @return list<TableDefinition>
      */
     public function sortTables(array $tables): array
     {
@@ -118,7 +118,7 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
             return $tables;
         }
 
-        if (ConfigResolver::get('sort_mode') == 'foreign_key') {
+        if (ConfigResolver::get('sort_mode') === 'foreign_key') {
             return (new DependencyResolver($tables))->getDependencyOrder();
         }
 
@@ -126,8 +126,8 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
     }
 
     /**
-     * @param TableDefinition[] $tables
-     * 
+     * @param list<TableDefinition> $tables
+     *
      * @return array<string, array<string, string>>
      */
     public function writeTableMigrations(array $tables, string $basePath): array
@@ -149,8 +149,8 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
     }
 
     /**
-     * @param ViewDefinition[] $views
-     * 
+     * @param list<ViewDefinition> $views
+     *
      * @return array<string, array<string, string>>
      */
     public function writeViewMigrations(array $views, string $basePath, int $tableCount = 0): array
@@ -166,14 +166,13 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
                 'path' => $path,
                 'time' => $this->timer->stop($viewName)->getElapsedTime($viewName),
             ];
-            
         }
 
         return $writted;
     }
 
     /**
-     * @return array<string>
+     * @return list<string>
      */
     public function skippableTables(): array
     {
@@ -182,11 +181,11 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
 
     public function skipTable($table): bool
     {
-        return in_array($table, $this->skippableTables());
+        return in_array($table, $this->skippableTables(), true);
     }
 
     /**
-     * @return array<string>
+     * @return list<string>
      */
     public function skippableViews(): array
     {
@@ -200,6 +199,6 @@ abstract class BaseGeneratorManager implements GeneratorManagerInterface
             return true;
         }
 
-        return in_array($view, $this->skippableViews());
+        return in_array($view, $this->skippableViews(), true);
     }
 }

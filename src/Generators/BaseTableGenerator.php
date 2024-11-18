@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Generators;
 
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\Generators\TableGeneratorInterface;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\TableDefinition;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns\CleansUpMorphColumns;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns\CleansUpColumnIndices;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns\CleansUpTimestampsColumn;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns\CleansUpForeignKeyIndices;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns\CleansUpMorphColumns;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns\CleansUpTimestampsColumn;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
 
 abstract class BaseTableGenerator implements TableGeneratorInterface
@@ -18,14 +27,13 @@ abstract class BaseTableGenerator implements TableGeneratorInterface
     use CleansUpColumnIndices;
 
     protected array $rows = [];
-
     protected TableDefinition $definition;
 
     public function __construct(string $tableName, array $rows = [])
     {
         $this->definition = new TableDefinition([
             'driver' => static::driver(),
-            'name'   => $tableName
+            'name'   => $tableName,
         ]);
 
         $this->rows = $rows;

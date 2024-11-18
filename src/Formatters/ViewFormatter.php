@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Formatters;
 
 use BlitzPHP\Utilities\Date;
 use BlitzPHP\Utilities\String\Text;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\FormatterInterface;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\Formatter;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\ViewDefinition;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\Formatter;
 
 class ViewFormatter implements FormatterInterface
 {
@@ -24,7 +33,7 @@ class ViewFormatter implements FormatterInterface
             'Timestamp'             => Date::now()->format($timestampFormat = config('migrations.timestampFormat', 'Y-m-d-His_')),
             'Index'                 => '0000-00-00_' . str_pad((string) $index, 6, '0', STR_PAD_LEFT),
             'IndexedEmptyTimestamp' => '0000-00-00_' . str_pad((string) $index, 6, '0', STR_PAD_LEFT),
-            'IndexedTimestamp'      => Date::now()->addSeconds($index)->format($timestampFormat)
+            'IndexedTimestamp'      => Date::now()->addSeconds($index)->format($timestampFormat),
         ];
     }
 
@@ -33,9 +42,10 @@ class ViewFormatter implements FormatterInterface
         $driver = $this->view->getDriver();
 
         $baseStubFileName = ConfigResolver::viewNamingScheme($driver);
+
         foreach ($this->stubNameVariables($index) as $variable => $replacement) {
-            if (preg_match("/\[" . $variable . "\]/i", $baseStubFileName) === 1) {
-                $baseStubFileName = preg_replace("/\[" . $variable . "\]/i", $replacement, $baseStubFileName);
+            if (preg_match('/\\[' . $variable . '\\]/i', $baseStubFileName) === 1) {
+                $baseStubFileName = preg_replace('/\\[' . $variable . '\\]/i', $replacement, $baseStubFileName);
             }
         }
 
@@ -47,18 +57,19 @@ class ViewFormatter implements FormatterInterface
         return ConfigResolver::stub('view', $this->view->getDriver());
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     public function render(string $tabCharacter = '    '): string
     {
-        $schema = $this->view->getSchema();
-        $stub = file_get_contents($this->getStubPath());
+        $schema    = $this->view->getSchema();
+        $stub      = file_get_contents($this->getStubPath());
         $variables = [
             '[ViewName:Studly]' => Text::studly($viewName = $this->view->getName()),
             '[ViewName]'        => $viewName,
-            '[Schema]'          => $schema
+            '[Schema]'          => $schema,
         ];
+
         foreach ($variables as $key => $value) {
             $stub = Formatter::replace($tabCharacter, $key, $value, $stub);
         }
@@ -66,9 +77,9 @@ class ViewFormatter implements FormatterInterface
         return $stub;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     public function write(string $basePath, int $index = 0, string $tabCharacter = '    '): string
     {
         $stub = $this->render($tabCharacter);

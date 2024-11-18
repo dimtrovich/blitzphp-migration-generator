@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Generators\Concerns;
 
 use Dimtrovich\BlitzPHP\MigrationGenerator\Generators\BaseTableGenerator;
@@ -22,7 +31,7 @@ trait CleansUpColumnIndices
                 foreach ($this->definition()->getColumns() as $column) {
                     /** @var \Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\ColumnDefinition $column */
                     if ($column->getName() === $indexColumn) {
-                        $indexType = $index->getType();
+                        $indexType          = $index->getType();
                         $isMultiColumnIndex = $index->isMultiColumnIndex();
 
                         if ($index->isPrimaryKey() && ! $isMultiColumnIndex) {
@@ -30,9 +39,10 @@ trait CleansUpColumnIndices
                             $index->markAsWritable(false);
                         } elseif ($indexType === 'index' && ! $isMultiColumnIndex) {
                             $isForeignKeyIndex = false;
+
                             foreach ($this->definition()->getIndexes() as $innerIndex) {
                                 /** @var \Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\IndexDefinition $innerIndex */
-                                if ($innerIndex->isForeignKey() && ! $innerIndex->isMultiColumnIndex() && $innerIndex->getColumns()[0] == $column->getName()) {
+                                if ($innerIndex->isForeignKey() && ! $innerIndex->isMultiColumnIndex() && $innerIndex->getColumns()[0] === $column->getName()) {
                                     $isForeignKeyIndex = true;
 
                                     break;

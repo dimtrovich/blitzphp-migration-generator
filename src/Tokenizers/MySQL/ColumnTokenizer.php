@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Tokenizers\MySQL;
 
 use BlitzPHP\Utilities\String\Text;
@@ -25,10 +34,10 @@ class ColumnTokenizer extends BaseColumnTokenizer
             $this->consumeZeroFill();
         }
         if ($this->isTextType()) {
-            //possibly has a character set
+            // possibly has a character set
             $this->consumeCharacterSet();
 
-            //has collation data most likely
+            // has collation data most likely
             $this->consumeCollation();
         }
 
@@ -42,7 +51,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
 
         $this->consumeGenerated();
 
-        if ($this->columnDataType == 'timestamp' || $this->columnDataType == 'datetime') {
+        if ($this->columnDataType === 'timestamp' || $this->columnDataType === 'datetime') {
             $this->consumeTimestamp();
         }
 
@@ -50,8 +59,6 @@ class ColumnTokenizer extends BaseColumnTokenizer
 
         return $this;
     }
-
-    //region Consumers
 
     protected function consumeName()
     {
@@ -72,7 +79,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
     protected function consumeType()
     {
         $originalColumnType = $columnType = strtolower($this->consume());
-        $hasConstraints = Text::contains($columnType, '(');
+        $hasConstraints     = Text::contains($columnType, '(');
 
         if ($hasConstraints) {
             $columnType = explode('(', $columnType)[0];
@@ -82,7 +89,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
 
         $this->resolveColumnMethod();
         if ($hasConstraints) {
-            preg_match("/\((.+?)\)/", $originalColumnType, $constraintMatches);
+            preg_match('/\\((.+?)\\)/', $originalColumnType, $constraintMatches);
             $matches = explode(',', $constraintMatches[1]);
             $this->resolveColumnConstraints($matches);
         }
@@ -102,17 +109,17 @@ class ColumnTokenizer extends BaseColumnTokenizer
     {
         $piece = $this->consume();
         if (strtoupper($piece) === 'NOT') {
-            $this->consume(); //next is NULL
+            $this->consume(); // next is NULL
             $this->definition->setNullable(false);
         } elseif (strtoupper($piece) === 'NULL') {
             $this->definition->setNullable(true);
         } else {
-            //something else
+            // something else
             $this->putBack($piece);
         }
 
         if (Text::contains($this->columnDataType, 'text')) {
-            //text column types are explicitly nullable unless set to NOT NULL
+            // text column types are explicitly nullable unless set to NOT NULL
             if ($this->definition->isNullable() === null) {
                 $this->definition->setNullable(true);
             }
@@ -142,7 +149,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
                     if (Text::contains(strtoupper($this->columnDataType), 'INT')) {
                         $this->definition->setDefaultValue((int) $this->definition->getDefaultValue());
                     } else {
-                        //floats get converted to strings improperly, gotta do a string cast
+                        // floats get converted to strings improperly, gotta do a string cast
                         $this->definition->setDefaultValue(ValueToString::castFloat($this->definition->getDefaultValue()));
                     }
                 } else {
@@ -176,7 +183,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
 
             $this->definition->setCharacterSet($this->consume());
         } else {
-            //something else
+            // something else
             $this->putBack($piece);
         }
     }
@@ -185,7 +192,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
     {
         $piece = $this->consume();
         if (strtoupper($piece) === 'COLLATE') {
-            //next piece is the collation type
+            // next piece is the collation type
             $this->definition->setCollation($this->consume());
         } else {
             $this->putBack($piece);
@@ -227,7 +234,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
     private function consumeGenerated()
     {
         $canContinue = false;
-        $nextPiece = $this->consume();
+        $nextPiece   = $this->consume();
         if (strtoupper($nextPiece) === 'GENERATED') {
             $piece = $this->consume();
             if (strtoupper($piece) === 'ALWAYS') {
@@ -246,8 +253,9 @@ class ColumnTokenizer extends BaseColumnTokenizer
             return;
         }
 
-        $expressionPieces = [];
+        $expressionPieces   = [];
         $parenthesisCounter = 0;
+
         while ($pieceOfExpression = $this->consume()) {
             $numOpeningParenthesis = substr_count($pieceOfExpression, '(');
             $numClosingParenthesis = substr_count($pieceOfExpression, ')');
@@ -292,9 +300,9 @@ class ColumnTokenizer extends BaseColumnTokenizer
         }
     }
 
-    //endregion
+    // endregion
 
-    //region Resolvers
+    // region Resolvers
     private function resolveColumnMethod()
     {
         $mapped = [
@@ -304,7 +312,7 @@ class ColumnTokenizer extends BaseColumnTokenizer
             'mediumint'          => 'mediumInteger',
             'bigint'             => 'bigInteger',
             'varchar'            => 'string',
-            'tinytext'           => 'string',  //tinytext is not a valid Blueprint method currently
+            'tinytext'           => 'string',  // tinytext is not a valid Blueprint method currently
             'mediumtext'         => 'mediumText',
             'longtext'           => 'longText',
             'blob'               => 'binary',
@@ -313,20 +321,20 @@ class ColumnTokenizer extends BaseColumnTokenizer
             'linestring'         => 'lineString',
             'multilinestring'    => 'multiLineString',
             'multipolygon'       => 'multiPolygon',
-            'multipoint'         => 'multiPoint'
+            'multipoint'         => 'multiPoint',
         ];
         if (isset($mapped[$this->columnDataType])) {
             $this->definition->setMethodName($mapped[$this->columnDataType]);
         } else {
-            //do some custom resolution
+            // do some custom resolution
             $this->definition->setMethodName($this->columnDataType);
         }
     }
 
     private function resolveColumnConstraints(array $constraints)
     {
-        if ($this->columnDataType === 'char' && count($constraints) === 1 && $constraints[0] == 36) {
-            //uuid for mysql
+        if ($this->columnDataType === 'char' && count($constraints) === 1 && $constraints[0] === 36) {
+            // uuid for mysql
             $this->definition->setIsUUID(true);
 
             return;
@@ -335,12 +343,12 @@ class ColumnTokenizer extends BaseColumnTokenizer
             $this->definition->setMethodParameters([array_map(fn ($item) => trim($item, '\''), $constraints)]);
         } else {
             if (Text::contains(strtoupper($this->columnDataType), 'INT')) {
-                $this->definition->setMethodParameters([]); //laravel does not like display field widths
+                $this->definition->setMethodParameters([]); // laravel does not like display field widths
             } else {
                 if ($this->definition->getMethodName() === 'string') {
                     if (count($constraints) === 1) {
-                        //has a width set
-                        if ($constraints[0] == 255 /*Builder::$defaultStringLength*/) {
+                        // has a width set
+                        if ($constraints[0] === 255 /* Builder::$defaultStringLength */) {
                             $this->definition->setMethodParameters([]);
 
                             return;

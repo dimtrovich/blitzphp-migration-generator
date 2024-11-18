@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Helpers;
 
 use BlitzPHP\Utilities\Iterable\Arr;
@@ -19,7 +28,7 @@ class ConfigResolver
 
     public static function stub(string $key, string $driver): string
     {
-        $path =  __DIR__ . '/../../stubs/' . $key . '.stub';
+        $path = __DIR__ . '/../../stubs/' . $key . '.stub';
 
         if (! function_exists('resource_path')) {
             return $path;
@@ -29,15 +38,14 @@ class ConfigResolver
             return $overridden;
         }
 
-        if (file_exists($overridden = resource_path('stubs/vendor/blitzphp-migration-generator/'. $key  .'.stub'))) {
+        if (file_exists($overridden = resource_path('stubs/vendor/blitzphp-migration-generator/' . $key . '.stub'))) {
             return $overridden;
         }
 
         return $path;
     }
 
-
-    protected static function retrieve(string $key): mixed 
+    protected static function retrieve(string $key): mixed
     {
         if (empty(self::$config)) {
             self::$config = require __DIR__ . '/../Config/blitzphp-migration-generator.php';

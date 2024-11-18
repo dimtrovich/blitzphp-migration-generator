@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Helpers;
 
 use BlitzPHP\Utilities\String\Text;
@@ -35,7 +44,7 @@ class ValueToString
                 return 'b\'' . str_replace('binary$:', '', $value) . '\'';
             }
         }
-        
+
         return $value;
     }
 
@@ -44,13 +53,15 @@ class ValueToString
         $quote = $singleQuote ? '\'' : '"';
         if ($value === null) {
             return 'null';
-        } elseif (is_array($value)) {
+        }
+        if (is_array($value)) {
             if ($singleOutArray && count($value) === 1) {
                 return $quote . $value[0] . $quote;
             }
 
             return '[' . collect($value)->map(fn ($item) => $quote . $item . $quote)->implode(', ') . ']';
-        } elseif (is_integer($value) || is_float($value)) {
+        }
+        if (is_int($value) || is_float($value)) {
             return $value;
         }
 

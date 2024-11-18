@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Formatters;
 
 use BlitzPHP\Utilities\Date;
@@ -8,9 +17,9 @@ use BlitzPHP\Utilities\String\Text;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\FormatterInterface;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\ColumnDefinition;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\IndexDefinition;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\Formatter;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Definitions\TableDefinition;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\Formatter;
 
 class TableFormatter implements FormatterInterface
 {
@@ -18,37 +27,36 @@ class TableFormatter implements FormatterInterface
     {
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     public function render(string $tabCharacter = '    '): string
     {
         $tableName = $this->table->getPresentableName();
 
         $schema = $this->getSchema($tabCharacter);
-        $stub = file_get_contents($this->getStubPath());
+        $stub   = file_get_contents($this->getStubPath());
 
-        if (strpos($stub, '[TableUp]') !== false) {
-            //uses new syntax
+        if (str_contains($stub, '[TableUp]')) {
+            // uses new syntax
             $stub = Formatter::replace($tabCharacter, '[TableUp]', $this->stubTableUp($tabCharacter), $stub);
             $stub = Formatter::replace($tabCharacter, '[TableDown]', $this->stubTableDown($tabCharacter), $stub);
         }
 
         $stub = str_replace('[TableName:Studly]', Text::studly($tableName), $stub);
         $stub = str_replace('[TableName]', $tableName, $stub);
-        $stub = Formatter::replace($tabCharacter, '[Schema]', $schema, $stub);
 
-        return $stub;
+        return Formatter::replace($tabCharacter, '[Schema]', $schema, $stub);
     }
 
     public function getStubFileName(int $index = 0): string
     {
-        $driver = $this->table->getDriver();
+        $driver           = $this->table->getDriver();
         $baseStubFileName = ConfigResolver::tableNamingScheme($driver);
 
         foreach ($this->stubNameVariables($index) as $variable => $replacement) {
-            if (preg_match("/\[" . $variable . "\]/i", $baseStubFileName) === 1) {
-                $baseStubFileName = preg_replace("/\[" . $variable . "\]/i", $replacement, $baseStubFileName);
+            if (preg_match('/\\[' . $variable . '\\]/i', $baseStubFileName) === 1) {
+                $baseStubFileName = preg_replace('/\\[' . $variable . '\\]/i', $replacement, $baseStubFileName);
             }
         }
 
@@ -81,7 +89,7 @@ class TableFormatter implements FormatterInterface
             'Timestamp'             => Date::now()->format($timestampFormat = config('migrations.timestampFormat', 'Y-m-d-His_')),
             'Index'                 => (string) $index,
             'IndexedEmptyTimestamp' => '0000-00-00_' . str_pad((string) $index, 6, '0', STR_PAD_LEFT),
-            'IndexedTimestamp'      => Date::now()->addSeconds($index)->format($timestampFormat)
+            'IndexedTimestamp'      => Date::now()->addSeconds($index)->format($timestampFormat),
         ];
     }
 
@@ -117,6 +125,7 @@ class TableFormatter implements FormatterInterface
 
         if (count($this->table->getColumns()) === 0) {
             $tableModifyStub = file_get_contents($this->getStubModifyPath());
+
             foreach ($variables as $var => $replacement) {
                 $tableModifyStub = Formatter::replace($tab, '[' . $var . ']', $replacement, $tableModifyStub);
             }
@@ -125,6 +134,7 @@ class TableFormatter implements FormatterInterface
         }
 
         $tableUpStub = file_get_contents($this->getStubCreatePath());
+
         foreach ($variables as $var => $replacement) {
             $tableUpStub = Formatter::replace($tab, '[' . $var . ']', $replacement, $tableUpStub);
         }
@@ -136,6 +146,7 @@ class TableFormatter implements FormatterInterface
     {
         if (count($this->table->getColumns()) === 0) {
             $schema = '$this->modify(\'' . $this->table->getName() . '\', function(Structure $table) {' . "\n";
+
             foreach ($this->table->getForeignKeys() as $index) {
                 $schema .= $tab . '$table->dropForeign(\'' . $index->getName() . '\');' . "\n";
             }
@@ -150,17 +161,17 @@ class TableFormatter implements FormatterInterface
     {
         $tableName = $this->table->getName();
 
-        return  [
+        return [
             'TableName:Studly'    => Text::studly($tableName),
             'TableName:Lowercase' => strtolower($tableName),
             'TableName'           => $tableName,
-            'Schema'              => $this->getSchema($tab)
+            'Schema'              => $this->getSchema($tab),
         ];
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
+    /**
+     * {@inheritDoc}
+     */
     public function write(string $basePath, int $index = 0, string $tabCharacter = '    '): string
     {
         $stub = $this->render($tabCharacter);

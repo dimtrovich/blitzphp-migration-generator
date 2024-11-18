@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Definitions;
 
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\FormatterInterface;
@@ -8,15 +17,14 @@ use Dimtrovich\BlitzPHP\MigrationGenerator\Formatters\NullFormatter;
 
 abstract class BaseDefinition implements StructureDefinitionInterface
 {
-    protected ?string $name = null; // les clés primaires n'ont généralement pas de nom
-
+    protected ?string $name  = null; // les clés primaires n'ont généralement pas de nom
     protected string $driver = '';
 
     public function __construct(array $attributes = [])
     {
         foreach ($attributes as $attribute => $value) {
             if (property_exists($this, $attribute)) {
-                $this->$attribute = $value;
+                $this->{$attribute} = $value;
             }
         }
     }

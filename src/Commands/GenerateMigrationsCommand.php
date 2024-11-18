@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Commands;
 
 use Ahc\Cli\Output\Color;
@@ -7,8 +16,8 @@ use BlitzPHP\Cli\Console\Command;
 use BlitzPHP\Database\Config\Services;
 use BlitzPHP\Utilities\Iterable\Arr;
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\GeneratorManagerInterface;
-use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
 use Dimtrovich\BlitzPHP\MigrationGenerator\GeneratorManagers\MySQLGeneratorManager;
+use Dimtrovich\BlitzPHP\MigrationGenerator\Helpers\ConfigResolver;
 use Exception;
 
 class GenerateMigrationsCommand extends Command
@@ -79,7 +88,7 @@ class GenerateMigrationsCommand extends Command
 
         try {
             $connection = $this->getConnection();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error($e->getMessage());
 
             return EXIT_ERROR;
@@ -108,11 +117,12 @@ class GenerateMigrationsCommand extends Command
 
         $viewNames = Arr::wrap($this->option('view'));
 
-        ['tables' => $tables, 'views' =>$views] = $manager->handle($basePath, $tableNames, $viewNames);
+        ['tables' => $tables, 'views' => $views] = $manager->handle($basePath, $tableNames, $viewNames);
 
         if ([] !== $tables) {
             $this->justify('Tables', options: ['sep' => '-']);
-            foreach($tables as $name => $details) {
+
+            foreach ($tables as $name => $details) {
                 $this->justify(
                     $this->color->ok($name, ['bold' => 1]) . ' (' . $details['time'] . ' ms)',
                     $this->color->warn(pathinfo($details['path'], PATHINFO_FILENAME))
@@ -122,7 +132,8 @@ class GenerateMigrationsCommand extends Command
 
         if ([] !== $views) {
             $this->justify('Vues', options: ['sep' => '-']);
-            foreach($views as $name => $details) {
+
+            foreach ($views as $name => $details) {
                 $this->justify(
                     $this->color->ok($name, ['bold' => 1]) . ' (' . $details['time'] . ' ms)',
                     $this->color->warn(pathinfo($details['path'], PATHINFO_FILENAME))
@@ -132,8 +143,8 @@ class GenerateMigrationsCommand extends Command
 
         $this->eol()->border(char: '*');
 
-        $tableDuration = array_reduce($tables, fn($acc, $details) => $details['time'] + $acc, 0);
-        $viewDuration = array_reduce($views, fn($acc, $details) => $details['time'] + $acc, 0);
+        $tableDuration = array_reduce($tables, fn ($acc, $details) => $details['time'] + $acc, 0);
+        $viewDuration  = array_reduce($views, fn ($acc, $details) => $details['time'] + $acc, 0);
 
         $options = ['sep' => '-', 'second' => ['fg' => Color::GREEN]];
         $this->justify('Table générées', (string) count($tables), $options);
@@ -150,13 +161,12 @@ class GenerateMigrationsCommand extends Command
     }
 
     /**
-     * @param string $driver
      * @return false|GeneratorManagerInterface
      */
     protected function resolveGeneratorManager(string $driver)
     {
         $supported = [
-            'mysql' => MySQLGeneratorManager::class
+            'mysql' => MySQLGeneratorManager::class,
         ];
 
         if (! isset($supported[$driver])) {

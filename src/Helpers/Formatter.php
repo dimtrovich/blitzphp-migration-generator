@@ -1,18 +1,26 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Helpers;
 
 use BlitzPHP\Utilities\Helpers;
 
 class Formatter
 {
-    private $lines = [];
-
+    private $lines        = [];
     private bool $isSpace = true;
 
     public function __construct(private string $tabCharacter = '    ')
     {
-        $this->isSpace = strpos($tabCharacter, "\t") === false;
+        $this->isSpace = ! str_contains($tabCharacter, "\t");
     }
 
     public function line(string $data, $indentTimes = 0)
@@ -41,7 +49,7 @@ class Formatter
     public function replaceOnLine($toReplace, $body)
     {
         if (preg_match('/^(\s+)?' . preg_quote($toReplace) . '/m', $body, $matches) !== false) {
-            $gap = $matches[1] ?? '';
+            $gap       = $matches[1] ?? '';
             $numSpaces = strlen($this->tabCharacter);
             if ($numSpaces === 0) {
                 $startingTabIndent = 0;
@@ -58,6 +66,7 @@ class Formatter
     public static function replace($tabCharacter, $toReplace, $replacement, $body)
     {
         $formatter = new static($tabCharacter);
+
         foreach (explode("\n", $replacement) as $line) {
             $formatter->line($line);
         }

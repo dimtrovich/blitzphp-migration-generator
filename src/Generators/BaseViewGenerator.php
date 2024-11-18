@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Generators;
 
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\Generators\ViewGeneratorInterface;
@@ -14,7 +23,7 @@ abstract class BaseViewGenerator implements ViewGeneratorInterface
         $this->definition = new ViewDefinition([
             'driver' => static::driver(),
             'name'   => $viewName,
-            'schema' => $schema
+            'schema' => $schema,
         ]);
     }
 
@@ -26,7 +35,7 @@ abstract class BaseViewGenerator implements ViewGeneratorInterface
     public static function init(string $viewName, ?string $schema = null): static
     {
         $instance = new static($viewName, $schema);
-        
+
         if ($schema === null) {
             $instance->resolveSchema();
         }

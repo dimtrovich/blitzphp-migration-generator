@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Definitions;
 
 use BlitzPHP\Utilities\String\Text;
@@ -13,42 +22,27 @@ class ColumnDefinition extends BaseDefinition implements StructureDefinitionInte
     use WritableTrait;
 
     protected string $methodName;
-
     protected array $methodParameters = [];
-
-    protected bool $unsigned = false;
-
-    protected ?bool $nullable = null;
-
+    protected bool $unsigned          = false;
+    protected ?bool $nullable         = null;
     protected $defaultValue;
-
-    protected ?string $comment = null;
-
-    protected ?string $characterSet = null;
-
-    protected ?string $collation = null;
-
-    protected bool $autoIncrementing = false;
-
-    protected bool $index = false;
-
-    protected bool $primary = false;
-
-    protected bool $unique = false;
-
-    protected bool $useCurrent = false;
-
+    protected ?string $comment         = null;
+    protected ?string $characterSet    = null;
+    protected ?string $collation       = null;
+    protected bool $autoIncrementing   = false;
+    protected bool $index              = false;
+    protected bool $primary            = false;
+    protected bool $unique             = false;
+    protected bool $useCurrent         = false;
     protected bool $useCurrentOnUpdate = false;
+    protected ?string $storedAs        = null;
+    protected ?string $virtualAs       = null;
+    protected bool $isUUID             = false;
 
-    protected ?string $storedAs = null;
-
-    protected ?string $virtualAs = null;
-
-    protected bool $isUUID = false;
-
-    /** @var IndexDefinition[] */
+    /**
+     * @var list<IndexDefinition>
+     */
     protected array $indexes = [];
-
 
     public function getMethodName(): string
     {
@@ -265,20 +259,19 @@ class ColumnDefinition extends BaseDefinition implements StructureDefinitionInte
         return $this;
     }
 
-
     protected function isNullableMethod(string $methodName): bool
     {
-        return ! in_array($methodName, ['softDeletes', 'morphs', 'nullableMorphs', 'rememberToken', 'nullableUuidMorphs']) && ! $this->isPrimaryKeyMethod($methodName);
+        return ! in_array($methodName, ['softDeletes', 'morphs', 'nullableMorphs', 'rememberToken', 'nullableUuidMorphs'], true) && ! $this->isPrimaryKeyMethod($methodName);
     }
 
     protected function isPrimaryKeyMethod(string $methodName): bool
     {
-        return in_array($methodName, ['tinyIncrements', 'mediumIncrements', 'increments', 'bigIncrements', 'id']);
+        return in_array($methodName, ['tinyIncrements', 'mediumIncrements', 'increments', 'bigIncrements', 'id'], true);
     }
 
     protected function canBeUnsigned(string $methodName): bool
     {
-        return ! in_array($methodName, ['morphs', 'nullableMorphs']) && ! $this->isPrimaryKeyMethod($methodName);
+        return ! in_array($methodName, ['morphs', 'nullableMorphs'], true) && ! $this->isPrimaryKeyMethod($methodName);
     }
 
     protected function guessBlitzMethod()
@@ -288,9 +281,9 @@ class ColumnDefinition extends BaseDefinition implements StructureDefinitionInte
             if ($this->methodName === 'bigInteger') {
                 if ($this->name === 'id') {
                     return [null, 'id', []];
-                } else {
-                    return [$this->name, 'bigIncrements', []];
                 }
+
+                return [$this->name, 'bigIncrements', []];
             } elseif ($this->methodName === 'mediumInteger') {
                 return [$this->name, 'mediumIncrements', []];
             } elseif ($this->methodName === 'integer') {
@@ -338,9 +331,9 @@ class ColumnDefinition extends BaseDefinition implements StructureDefinitionInte
                 'integer',
                 'mediumInteger',
                 'smallInteger',
-                'tinyInteger'
+                'tinyInteger',
             ];
-            if (in_array($this->methodName, $availableUnsignedPrefixes)) {
+            if (in_array($this->methodName, $availableUnsignedPrefixes, true)) {
                 return [$this->name, 'unsigned' . ucfirst($this->methodName), $this->methodParameters];
             }
         }
@@ -368,7 +361,7 @@ class ColumnDefinition extends BaseDefinition implements StructureDefinitionInte
 
         if ($this->defaultValue === 'NULL') {
             $this->defaultValue = null;
-            $this->nullable = true;
+            $this->nullable     = true;
         }
 
         if ($this->isNullableMethod($finalMethodName)) {

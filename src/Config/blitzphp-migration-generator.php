@@ -1,9 +1,18 @@
 <?php
 
-return [
-    'clear_output_path'    => env('BMG_CLEAR_OUTPUT_PATH', false),
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
 
-	// Configuration par défaut
+return [
+    'clear_output_path' => env('BMG_CLEAR_OUTPUT_PATH', false),
+
+    // Configuration par défaut
     'table_naming_scheme' => env('BMG_TABLE_NAMING_SCHEME', '[IndexedTimestamp]Create[TableName:Studly]Table.php'),
     'view_naming_scheme'  => env('BMG_VIEW_NAMING_SCHEME', '[IndexedTimestamp]Create[ViewName:Studly]View.php'),
     'path'                => env('BMG_OUTPUT_PATH', 'app/Database/Migrations'),
@@ -22,7 +31,7 @@ return [
     ],
 
     // Configuration spécifique aux pilotes de base de données
-    //null = use default
+    // null = use default
     'mysql' => [
         'table_naming_scheme' => env('BMG_MYSQL_TABLE_NAMING_SCHEME', null),
         'view_naming_scheme'  => env('BMG_MYSQL_VIEW_NAMING_SCHEME', null),
@@ -42,7 +51,7 @@ return [
         'view_naming_scheme'  => env('BMG_PGSQL_VIEW_NAMING_SCHEME', null),
         'path'                => env('BMG_PGSQL_OUTPUT_PATH', null),
         'skippable_tables'    => env('BMG_PGSQL_SKIPPABLE_TABLES', null),
-        'skippable_views'     => env('BMG_PGSQL_SKIPPABLE_VIEWS', null)
+        'skippable_views'     => env('BMG_PGSQL_SKIPPABLE_VIEWS', null),
     ],
     'sqlsrv' => [
         'table_naming_scheme' => env('BMG_SQLSRV_TABLE_NAMING_SCHEME', null),

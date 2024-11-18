@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * This file is part of dimtrovich/blitzphp-migration-generator".
+ *
+ * (c) 2024 Dimitri Sitchet Tomkeu <devcode.dst@gmail.com>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Dimtrovich\BlitzPHP\MigrationGenerator\Definitions;
 
 use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\StructureDefinitionInterface;
@@ -7,12 +16,12 @@ use Dimtrovich\BlitzPHP\MigrationGenerator\Contracts\StructureDefinitionInterfac
 class TableDefinition extends BaseDefinition implements StructureDefinitionInterface
 {
     /**
-     * @var ColumnDefinition[]
+     * @var list<ColumnDefinition>
      */
     protected array $columns = [];
 
     /**
-     * @var IndexDefinition[]
+     * @var list<IndexDefinition>
      */
     protected array $indexes = [];
 
@@ -21,6 +30,7 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
         if (count($this->getColumns()) === 0) {
             if (count($definitions = $this->getIndexes()) > 0) {
                 $first = collect($definitions)->first();
+
                 // une table à clé étrangère uniquement à partir de la résolution des dépendances
                 return $this->getName() . '_' . $first->getName();
             }
@@ -30,7 +40,7 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
     }
 
     /**
-     * @return ColumnDefinition[].
+     * @return list<ColumnDefinition>.
      */
     public function getColumns(): array
     {
@@ -38,7 +48,7 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
     }
 
     /**
-     * @param ColumnDefinition[] $columns
+     * @param list<ColumnDefinition> $columns
      */
     public function setColumns(array $columns): self
     {
@@ -55,7 +65,7 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
     }
 
     /**
-     * @return IndexDefinition[]
+     * @return list<IndexDefinition>
      */
     public function getIndexes(): array
     {
@@ -63,7 +73,7 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
     }
 
     /**
-     * @return IndexDefinition[]
+     * @return list<IndexDefinition>
      */
     public function getForeignKeys(): array
     {
@@ -73,7 +83,7 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
     }
 
     /**
-     * @param IndexDefinition[] $indexDefinitions
+     * @param list<IndexDefinition> $indexDefinitions
      */
     public function setIndexes(array $indexes): self
     {
@@ -102,9 +112,9 @@ class TableDefinition extends BaseDefinition implements StructureDefinitionInter
         return $this;
     }
 
-	/**
-	 * @return ColumnDefinition[]
-	 */
+    /**
+     * @return list<ColumnDefinition>
+     */
     public function getPrimaryKey(): array
     {
         return collect($this->getColumns())
