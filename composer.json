@@ -28,7 +28,7 @@
     "require-dev": {
         "blitz-php/coding-standard": "^1.4",
         "blitz-php/framework": "^0.11.3",
-        "kahlan/kahlan": "^5.2"
+        "kahlan/kahlan": "^5.2 || ^6.0"
     },
     "autoload": {
         "psr-4": {
