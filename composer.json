@@ -27,7 +27,7 @@
     },
     "require-dev": {
         "blitz-php/coding-standard": "^1.4",
-        "blitz-php/framework": "^0.11.3",
+        "blitz-php/framework": "^0.11.3 || ^0.12.0",
         "kahlan/kahlan": "^5.2"
     },
     "autoload": {
